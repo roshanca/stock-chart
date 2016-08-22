@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>K 线示例</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <style type="text/css">
+    body {
+      margin: 0;
+      padding: 10px;
+      /* Better Font Rendering =========== */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="kLine"></canvas>
+  <script src="../dist/stock-chart.js"></script>
+  <script src="data.js"></script>
+  <script>
+    console.log(kLine.result);
+    var data = kLine.result.detail_list;
+    var ohlcPrices = [];
+    var volumes = [];
+    var dates = [];
+    var ma5Prices = [];
+    var ma10Prices = [];
+    var ma20Prices = [];
+
+    for (var i = 0, len = data.length; i < len; i++) {
+      ohlcPrices.push({
+        o: parseFloat(data[i].open_px),
+        h: parseFloat(data[i].high_px),
+        l: parseFloat(data[i].low_px),
+        c: parseFloat(data[i].close_px)
+      });
+      volumes.push(parseFloat(data[i].business_amount));
+      dates.push(data[i].min_time.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2'));
+      ma5Prices.push(parseFloat(data[i].ma5));
+      ma10Prices.push(parseFloat(data[i].ma10));
+      ma20Prices.push(parseFloat(data[i].ma20));
+    }
+
+    // console.log(ohlcPrices);
+
+    StockChart.drawKLine({
+      id: 'kLine',
+      width: document.body.clientWidth - 20,
+      height: 180,
+      ohlcPrices: ohlcPrices,
+      volumes: volumes,
+      dates: dates,
+      maLists: [
+        {
+          title: 'MA5',
+          prices: ma5Prices
+        },
+        {
+          title: 'MA10',
+          prices: ma10Prices
+        },
+        {
+          title: 'MA20',
+          prices: ma20Prices
+        }
+      ],
+      period: 0
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>分时示例</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <style type="text/css">
+    body {
+      margin: 0;
+      padding: 10px;
+      /* Better Font Rendering =========== */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="trendLine"></canvas>
+  <script src="../dist/stock-chart.js"></script>
+  <script src="data.js"></script>
+  <script>
+    console.log(trendLine.result);
+    var data = trendLine.result.detail_list;
+    var prices = [];
+    var volumes = [];
+    var avgPrices = [];
+
+    for (var i = 0, len = data.length; i < len; i++) {
+      prices.push(data[i].last_px);
+      volumes.push(data[i].min_business_amount);
+      avgPrices.push(data[i].avg_px)
+    }
+
+    // console.log(avgPrices);
+
+    StockChart.drawTrendLine({
+      id: 'trendLine',
+      width: document.body.clientWidth - 20,
+      height: 180,
+      prices: prices,
+      volumes: volumes,
+      avgPrices: avgPrices,
+      preClosePrice: 9.66
+    });
+  </script>
+</body>
+</html>
