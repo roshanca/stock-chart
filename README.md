@@ -8,7 +8,7 @@
 
 ## Example
 
-http://wx.vstock.cairenhui.com/
+http://h5.vstock.cairenhui.com/
 
 ## Usage
 
