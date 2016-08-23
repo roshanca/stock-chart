@@ -153,7 +153,7 @@ module StockChart {
       const {ctx, dpr} = this
 
       ctx.beginPath()
-      ctx.arc(round.point[0] * dpr, round.point[1] * dpr, round.radius * dpr, 0, 2* Math.PI)
+      ctx.arc(round.point[0] * dpr, round.point[1] * dpr, round.radius * dpr, 0, 2 * Math.PI)
       ctx.closePath()
 
       if (round.isStroke) {

@@ -153,9 +153,11 @@ module StockChart {
       let maxPrice = Math.max.apply(null, highPrices)
       let minPrice = Math.min.apply(null, lowPrices)
 
+      // 横座标和纵座标的单位尺寸
       const unitX = this.unitX
       const unitY = this.unitY = (figureOffsetHeight - 10) / (maxPrice - minPrice)
 
+      // 纵座标顶部和底部的价格，这里一般是之前计算出的 maxPrice 和 minPrice
       this.roofPrice = maxPrice
       // this.floorPrice = (minPrice * unitY - 10) / unitY
       this.floorPrice = minPrice
@@ -209,12 +211,15 @@ module StockChart {
       let maxVolume = Math.max.apply(null, volumes)
       let minVolume = Math.min.apply(null, volumes)
 
+      // 如果最大交易量等于最小交易量，计算单位高度保证分母为 1
       if (maxVolume === minVolume) {
         minVolume = maxVolume - 1
       }
 
+      // 单位高度
       const volumeUnitY = (volumeHeight - textOffsetY) / (maxVolume - minVolume)
 
+      // 绘制量线
       let currentVolumeHeight
       for (let i = 0; i < count; i++) {
         const barX = unitX * i + unitX / 2
@@ -245,7 +250,8 @@ module StockChart {
         this.drawMaLine(maList)
       })
 
-      this.drawMaTooltip()
+      // 绘制均线指示图
+      this.drawMaLegend()
     }
 
     private drawMaLine(maList: MAList) {
@@ -263,6 +269,7 @@ module StockChart {
 
       maColor = this.getMaColor(maList)
 
+      // 当当前价大于坐标顶部的最大价格，均线不显示，所以这里采用 NaN
       points = maList.prices.map((price: number, index: number): Point => {
         return [unitX * index, price > roofPrice ? NaN : calcY(price)]
       })
@@ -291,7 +298,7 @@ module StockChart {
       return maColor
     }
 
-    private drawMaTooltip() {
+    private drawMaLegend() {
       const {ctx, dpr, maLists, figureWidth, figureOffsetY} = this
 
       const len = maLists.length
@@ -308,6 +315,8 @@ module StockChart {
 
       for (let i = len - 1, textWidth = 0; i >= 0; i--) {
         const title = maLists[i].title
+
+        // 这里要重新初始化 canvas 字体，否则 drawText 中对字体的处理会对 measureText 造成影响
         ctx.font = this.font
 
         // 去除空数据，这里的空数据指的是 NaN
@@ -321,7 +330,7 @@ module StockChart {
 
         lastPrice = prices[prices.length - 1]
         text = `${title}  ${lastPrice}`
-        textWidth += (ctx.measureText(text).width)
+        textWidth += ctx.measureText(text).width
 
         this.drawText(text, [figureWidth - textWidth, figureOffsetY - 5])
         this.drawRound({
@@ -419,7 +428,7 @@ module StockChart {
 
           for (let j = 1; j < dayDates.length; j++) {
 
-            // 如果相隔太近（7个点内），也不显示横座标值
+            // 如果相隔太近（7个点内），也不显示横座标值，否则会产生文字重叠现象
             if (dayDates[j].index - dayDates[j - 1].index < 7) {
               dayDates.splice(j, 1)
             }

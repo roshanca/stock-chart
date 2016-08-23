@@ -234,6 +234,7 @@ module StockChart {
       // 成交量的单位高度
       const volumeUnitY = (volumeHeight - textOffsetY) / (maxVolume - minVolume)
 
+      // 绘制量线
       for (let i = 0; i < volumes.length; i++) {
         ctx.beginPath()
         this.drawLine({
