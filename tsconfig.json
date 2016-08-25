@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "none",
-    "outFile": "./dist/stock-chart.js"
+    "outFile": "./dist/stock-chart.js",
+    "removeComments": true
   }
 }

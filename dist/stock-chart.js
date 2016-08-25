@@ -1,8 +1,5 @@
 var StockChart;
 (function (StockChart) {
-    /**
-     * Chart
-     */
     var Chart = (function () {
         function Chart(options) {
             this.canvas = document.getElementById(options.id);
@@ -24,7 +21,6 @@ var StockChart;
         Chart.prototype.initContext = function () {
             var dpr = Math.max(window.devicePixelRatio || 1, 1);
             var ctx = this.canvas.getContext('2d');
-            // retina 屏幕优化
             if (dpr !== 1) {
                 ctx.scale(dpr, dpr);
             }
@@ -130,8 +126,6 @@ var StockChart;
     }
     StockChart.arrayObjectIndexOf = arrayObjectIndexOf;
 })(StockChart || (StockChart = {}));
-/// <reference path="chart.ts" />
-/// <reference path="utils.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -184,31 +178,26 @@ var StockChart;
         KLine.prototype.drawGrid = function () {
             var _a = this, ctx = _a.ctx, grid = _a.grid, height = _a.height, figureWidth = _a.figureWidth, figureHeight = _a.figureHeight, figureOffsetHeight = _a.figureOffsetHeight, figureOffsetY = _a.figureOffsetY, volumeTopHeight = _a.volumeTopHeight;
             ctx.beginPath();
-            // 横轴基线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, this.figureHeight],
                 points: [[figureWidth, figureHeight]]
             }, false);
-            // 量图顶部线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, volumeTopHeight],
                 points: [[figureWidth, volumeTopHeight]]
             }, false);
-            // 图表顶部线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, 0],
                 points: [[figureWidth, 0]]
             }, false);
-            // 图表底部线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, this.height],
                 points: [[figureWidth, height]]
             });
-            // 横向网格
             var gridY = figureOffsetHeight / grid.y;
             for (var i = 0; i < grid.y; i++) {
                 ctx.beginPath();
@@ -235,13 +224,10 @@ var StockChart;
             var unitX = this.unitX;
             var unitY = this.unitY = (figureOffsetHeight - 10) / (maxPrice - minPrice);
             this.roofPrice = maxPrice;
-            // this.floorPrice = (minPrice * unitY - 10) / unitY
             this.floorPrice = minPrice;
-            // 计算当前价所在纵轴坐标位置
             var calcY = this.calcY = function (price) {
                 return Math.round(figureHeight - Math.abs(price - minPrice) * unitY - 10);
             };
-            // 绘制 K 线
             for (var i = 0; i < count; i++) {
                 var openPrice = ohlcPrices[i].o;
                 var highPrice = ohlcPrices[i].h;
@@ -310,7 +296,7 @@ var StockChart;
             maLists.forEach(function (maList) {
                 _this.drawMaLine(maList);
             });
-            this.drawMaTooltip();
+            this.drawMaLegend();
         };
         KLine.prototype.drawMaLine = function (maList) {
             var _a = this, ctx = _a.ctx, unitX = _a.unitX, calcY = _a.calcY, roofPrice = _a.roofPrice;
@@ -347,7 +333,7 @@ var StockChart;
             }
             return maColor;
         };
-        KLine.prototype.drawMaTooltip = function () {
+        KLine.prototype.drawMaLegend = function () {
             var _a = this, ctx = _a.ctx, dpr = _a.dpr, maLists = _a.maLists, figureWidth = _a.figureWidth, figureOffsetY = _a.figureOffsetY;
             var len = maLists.length;
             var dot = {
@@ -362,7 +348,6 @@ var StockChart;
             for (var i = len - 1, textWidth_1 = 0; i >= 0; i--) {
                 var title = maLists[i].title;
                 ctx.font = this.font;
-                // 去除空数据，这里的空数据指的是 NaN
                 prices = maLists[i].prices.filter(function (price) {
                     return Boolean(price);
                 });
@@ -371,7 +356,7 @@ var StockChart;
                 }
                 lastPrice = prices[prices.length - 1];
                 text = title + "  " + lastPrice;
-                textWidth_1 += (ctx.measureText(text).width);
+                textWidth_1 += ctx.measureText(text).width;
                 this.drawText(text, [figureWidth - textWidth_1, figureOffsetY - 5]);
                 this.drawRound({
                     point: [figureWidth - textWidth_1 - dot.radius - dot.paddingRight, figureOffsetY - 5 - dot.radius],
@@ -392,14 +377,11 @@ var StockChart;
             var dates = this.dates;
             var len = dates.length;
             var count = Math.min(len, dataCount);
-            // 最前两点不显示横座标，因为显示不下
             if (count <= 2) {
                 return;
             }
-            // 重新开辟绘画路径，避免横向网格线变粗
             ctx.beginPath();
             switch (Period[period]) {
-                // 周 K
                 case 'Week':
                     var uniqDates = [];
                     var weekDates = [];
@@ -421,7 +403,6 @@ var StockChart;
                         _this.drawGridTextX(date.text, date.index);
                     });
                     break;
-                // 月 K
                 case 'Month':
                     var monthDates = [];
                     dates = dates.map(function (date) {
@@ -439,7 +420,6 @@ var StockChart;
                         _this.drawGridTextX(date.text, date.index);
                     });
                     break;
-                // 默认 Period 为 'Day' 为日 K
                 default:
                     var dayDates = [];
                     for (var i = 2; i < count - 2; i++) {
@@ -451,7 +431,6 @@ var StockChart;
                         }
                     }
                     for (var j = 1; j < dayDates.length; j++) {
-                        // 如果相隔太近（7个点内），也不显示横座标值
                         if (dayDates[j].index - dayDates[j - 1].index < 7) {
                             dayDates.splice(j, 1);
                         }
@@ -478,7 +457,6 @@ var StockChart;
             var _a = this, riseColor = _a.riseColor, fallColor = _a.fallColor;
             var openPrice = bars[index].o;
             var closePrice = bars[index].c;
-            // 涨
             if (closePrice > openPrice) {
                 return riseColor;
             }
@@ -516,13 +494,8 @@ var StockChart;
     }
     StockChart.drawKLine = drawKLine;
 })(StockChart || (StockChart = {}));
-/// <reference path="chart.ts" />
-/// <reference path="utils.ts" />
 var StockChart;
 (function (StockChart) {
-    /**
-     * TrendLine
-     */
     var TrendLine = (function (_super) {
         __extends(TrendLine, _super);
         function TrendLine(options) {
@@ -547,19 +520,16 @@ var StockChart;
         TrendLine.prototype.drawGrid = function () {
             var _a = this, ctx = _a.ctx, grid = _a.grid, height = _a.height, figureWidth = _a.figureWidth, figureHeight = _a.figureHeight, figureOffsetHeight = _a.figureOffsetHeight, figureOffsetY = _a.figureOffsetY;
             ctx.beginPath();
-            // 横轴基线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, figureHeight],
                 points: [[figureWidth, figureHeight]]
             }, false);
-            // 图表顶部线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, 0],
                 points: [[figureWidth, 0]]
             }, false);
-            // 纵向网格
             var gridX = figureWidth / grid.x;
             for (var i = 1; i < grid.x; i++) {
                 this.drawLine({
@@ -568,7 +538,6 @@ var StockChart;
                     points: [[gridX * i, figureHeight]]
                 }, false);
             }
-            // 横向网格
             var gridY = figureOffsetHeight / grid.y;
             for (var j = 0; j < grid.y; j++) {
                 this.drawLine({
@@ -577,7 +546,6 @@ var StockChart;
                     points: [[figureWidth, gridY * j + figureOffsetY]]
                 }, false);
             }
-            // 图表底部线
             this.drawLine({
                 color: grid.color,
                 startPoint: [0, height],
@@ -589,15 +557,12 @@ var StockChart;
             var _a = this, ctx = _a.ctx, dpr = _a.dpr, figureWidth = _a.figureWidth, figureHeight = _a.figureHeight, figureOffsetHeight = _a.figureOffsetHeight, figureOffsetY = _a.figureOffsetY;
             var _b = this, prices = _b.prices, preClosePrice = _b.preClosePrice, avgPrices = _b.avgPrices, isIndex = _b.isIndex;
             var isFlat = false;
-            // 股票最高价和最低价
             var maxPrice = Math.max.apply(null, prices);
             var minPrice = Math.min.apply(null, prices);
             var maxDiff = Math.abs(maxPrice - preClosePrice);
             var minDiff = Math.abs(preClosePrice - minPrice);
-            // 横座标和纵座标的单位尺寸
             var unitX = this.unitX = figureWidth / (60 * 4);
             var unitY;
-            // 计算当前价所在纵轴坐标位置
             var calcY = function (price) {
                 return figureHeight - Math.abs(price - _this.floorPrice) * unitY;
             };
@@ -626,10 +591,8 @@ var StockChart;
                 this.roofPrice = (preClosePrice - minPrice) * 2 + minPrice;
                 this.floorPrice = minPrice;
             }
-            // 价格的最高涨幅和最低跌幅
             this.roofPercent = calcPercent(this.roofPrice);
             this.floorPercent = calcPercent(this.floorPrice);
-            // 绘制分时
             var points = [];
             for (var i = 0; i < prices.length; i++) {
                 points.push([i * unitX, isFlat ? figureOffsetY : calcY(prices[i])]);
@@ -642,7 +605,6 @@ var StockChart;
                 points: points
             });
             fillBlock();
-            // 绘制均线
             if (!isIndex && avgPrices) {
                 var avgPricesPoints = [];
                 for (var i = 0; i < avgPrices.length; i++) {
@@ -663,13 +625,11 @@ var StockChart;
             var axisY = height - volumeHeight;
             var roofY = figureOffsetY - textOffsetY;
             var floorY = figureHeight - textOffsetY;
-            // 分时横座标
             this.drawText('09:30', [0, axisY]);
             this.drawText('10:30', [figureWidth / 4 - 13, axisY]);
             this.drawText('11:30/13:00', [figureWidth / 2 - 25, axisY]);
             this.drawText('14:00', [(figureWidth / 4) * 3 - 13, axisY]);
             this.drawText('15:00', [figureWidth - 27, axisY]);
-            // 价格纵座标
             this.drawText(roofPrice.toFixed(2), [0, roofY]);
             this.drawText(floorPrice.toFixed(2), [0, floorY]);
             this.drawText(preClosePrice.toFixed(2), [0, figureOffsetHeight / 2 + roofY]);
@@ -687,10 +647,8 @@ var StockChart;
         };
         TrendLine.prototype.drawVolumeLine = function () {
             var _a = this, ctx = _a.ctx, volumes = _a.volumes, volumeHeight = _a.volumeHeight, height = _a.height, textOffsetY = _a.textOffsetY, unitX = _a.unitX;
-            // 最大最小成交量
             var maxVolume = Math.max.apply(null, volumes);
             var minVolume = Math.min.apply(null, volumes);
-            // 成交量的单位高度
             var volumeUnitY = (volumeHeight - textOffsetY) / (maxVolume - minVolume);
             for (var i = 0; i < volumes.length; i++) {
                 ctx.beginPath();
