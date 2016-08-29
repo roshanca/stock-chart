@@ -12,6 +12,7 @@ module StockChart {
     middleLineColor: string
     volumeColor: string
     avgLineColor: string
+    isIndex: boolean
   }
 
   /**
@@ -32,6 +33,7 @@ module StockChart {
     floorPrice: number
     roofPercent: string
     floorPercent: string
+    isIndex: boolean
 
     constructor(options?: ITrendlineOptions) {
       super(options)
@@ -44,6 +46,7 @@ module StockChart {
       this.middleLineColor = options.middleLineColor
       this.volumeColor = options.volumeColor
       this.avgLineColor = options.avgLineColor
+      this.isIndex = options.isIndex
     }
 
     initialize() {

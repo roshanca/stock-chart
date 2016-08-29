@@ -16,7 +16,6 @@ var StockChart;
             this.font = options.font || '10px Helvetica';
             this.textColor = options.textColor || 'rgba(138,138,138,1)';
             this.lineColor = options.lineColor || 'rgba(94,168,199,1)';
-            this.isIndex = options.isIndex;
         }
         Chart.prototype.initContext = function () {
             var dpr = Math.max(window.devicePixelRatio || 1, 1);
@@ -508,6 +507,7 @@ var StockChart;
             this.middleLineColor = options.middleLineColor;
             this.volumeColor = options.volumeColor;
             this.avgLineColor = options.avgLineColor;
+            this.isIndex = options.isIndex;
         }
         TrendLine.prototype.initialize = function () {
             _super.prototype.initialize.call(this);

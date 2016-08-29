@@ -12,7 +12,6 @@ module StockChart {
     font: string,
     textColor: string
     lineColor: string
-    isIndex: boolean
   }
 
   export type Point = {
@@ -63,7 +62,6 @@ module StockChart {
     font: string
     textColor: string
     lineColor: string
-    isIndex: boolean
 
     constructor(options?: IChartOptions) {
       this.canvas = <HTMLCanvasElement> document.getElementById(options.id)
@@ -80,7 +78,6 @@ module StockChart {
       this.font = options.font || '10px Helvetica'
       this.textColor = options.textColor || 'rgba(138,138,138,1)'
       this.lineColor = options.lineColor || 'rgba(94,168,199,1)'
-      this.isIndex = options.isIndex
     }
 
     initContext() {
