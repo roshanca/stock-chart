@@ -557,6 +557,7 @@ var StockChart;
             var _a = this, ctx = _a.ctx, dpr = _a.dpr, figureWidth = _a.figureWidth, figureHeight = _a.figureHeight, figureOffsetHeight = _a.figureOffsetHeight, figureOffsetY = _a.figureOffsetY;
             var _b = this, prices = _b.prices, preClosePrice = _b.preClosePrice, avgPrices = _b.avgPrices, isIndex = _b.isIndex;
             var isFlat = false;
+            var isSuspended = false;
             var maxPrice = Math.max.apply(null, prices);
             var minPrice = Math.min.apply(null, prices);
             var maxDiff = Math.abs(maxPrice - preClosePrice);
@@ -564,7 +565,15 @@ var StockChart;
             var unitX = this.unitX = figureWidth / (60 * 4);
             var unitY;
             var calcY = function (price) {
-                return figureHeight - Math.abs(price - _this.floorPrice) * unitY;
+                if (isSuspended) {
+                    return figureOffsetHeight / 2 + figureOffsetY;
+                }
+                else if (isFlat) {
+                    return figureOffsetY;
+                }
+                else {
+                    return figureHeight - Math.abs(price - _this.floorPrice) * unitY;
+                }
             };
             var calcPercent = function (price) {
                 return ((price - preClosePrice) / preClosePrice * 100).toFixed(2) + '%';
@@ -582,20 +591,27 @@ var StockChart;
                 isFlat = true;
             }
             if (maxDiff >= minDiff) {
-                unitY = figureOffsetHeight / ((maxPrice - preClosePrice) * 2);
-                this.roofPrice = maxPrice;
-                this.floorPrice = this.preClosePrice * 2 - maxPrice;
+                if (maxPrice !== preClosePrice) {
+                    unitY = figureOffsetHeight / ((maxPrice - preClosePrice) * 2);
+                    this.roofPrice = maxPrice;
+                    this.floorPrice = preClosePrice * 2 - maxPrice;
+                }
+                else {
+                    this.roofPrice = preClosePrice * 1.02;
+                    this.floorPrice = preClosePrice * 0.98;
+                    isSuspended = true;
+                }
             }
             else {
-                unitY = this.figureOffsetHeight / ((preClosePrice - minPrice) * 2);
+                unitY = figureOffsetHeight / ((preClosePrice - minPrice) * 2);
                 this.roofPrice = (preClosePrice - minPrice) * 2 + minPrice;
                 this.floorPrice = minPrice;
             }
-            this.roofPercent = calcPercent(this.roofPrice);
-            this.floorPercent = calcPercent(this.floorPrice);
+            this.roofPercent = isSuspended ? '2.00%' : calcPercent(this.roofPrice);
+            this.floorPercent = isSuspended ? '-2.00%' : calcPercent(this.floorPrice);
             var points = [];
             for (var i = 0; i < prices.length; i++) {
-                points.push([i * unitX, isFlat ? figureOffsetY : calcY(prices[i])]);
+                points.push([i * unitX, calcY(prices[i])]);
             }
             ctx.beginPath();
             this.drawLine({
