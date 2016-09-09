@@ -111,6 +111,7 @@ module StockChart {
       const {prices, preClosePrice, avgPrices, isIndex} = this
 
       let isFlat: boolean = false
+      let isSuspended: boolean = false
 
       // 股票最高价和最低价
       const maxPrice: number = Math.max.apply(null, prices)
@@ -125,7 +126,13 @@ module StockChart {
 
       // 计算当前价所在纵轴坐标位置
       const calcY = (price: number): number => {
-        return figureHeight - Math.abs(price - this.floorPrice) * unitY
+        if (isSuspended) {
+          return figureOffsetHeight / 2 + figureOffsetY
+        } else if (isFlat) {
+          return figureOffsetY
+        } else {
+          return figureHeight - Math.abs(price - this.floorPrice) * unitY
+        }
       }
 
       const calcPercent = (price: number): string => {
@@ -148,23 +155,29 @@ module StockChart {
       }
 
       if (maxDiff >= minDiff) {
-        unitY = figureOffsetHeight / ((maxPrice - preClosePrice) * 2)
-        this.roofPrice = maxPrice
-        this.floorPrice = this.preClosePrice * 2 - maxPrice
+        if (maxPrice !== preClosePrice) {
+          unitY = figureOffsetHeight / ((maxPrice - preClosePrice) * 2)
+          this.roofPrice = maxPrice
+          this.floorPrice = preClosePrice * 2 - maxPrice
+        } else { // 停牌的情况
+          this.roofPrice = preClosePrice * 1.02
+          this.floorPrice = preClosePrice * 0.98
+          isSuspended = true
+        }
       } else {
-        unitY = this.figureOffsetHeight / ((preClosePrice - minPrice) * 2)
+        unitY = figureOffsetHeight / ((preClosePrice - minPrice) * 2)
         this.roofPrice = (preClosePrice - minPrice) * 2 + minPrice
         this.floorPrice = minPrice
       }
 
       // 价格的最高涨幅和最低跌幅
-      this.roofPercent = calcPercent(this.roofPrice)
-      this.floorPercent = calcPercent(this.floorPrice)
+      this.roofPercent = isSuspended? '2.00%' : calcPercent(this.roofPrice)
+      this.floorPercent = isSuspended? '-2.00%' : calcPercent(this.floorPrice)
 
       // 绘制分时
       let points: Point[] = []
       for (let i = 0; i < prices.length; i++) {
-        points.push([i * unitX, isFlat ? figureOffsetY : calcY(prices[i])])
+        points.push([i * unitX, calcY(prices[i])])
       }
 
       ctx.beginPath()
