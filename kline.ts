@@ -431,6 +431,7 @@ module StockChart {
             // 如果相隔太近（7个点内），也不显示横座标值，否则会产生文字重叠现象
             if (dayDates[j].index - dayDates[j - 1].index < 7) {
               dayDates.splice(j, 1)
+              j--;
             }
           }
 
